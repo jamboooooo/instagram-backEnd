@@ -1,27 +1,29 @@
-const express = require('express')
-const mongoose = require('mongoose')
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const upload = require('express-fileupload');
+const path = require('path')
+const {
+    PORT,
+    MongoLink
+} = require('./config');
 
-const app = express()
+const app = express();
 
-const start = async() => {
-    try {
-        await mongoose.connect('', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false
-        })
-        console.log('success connnect mongo');
-    } catch (e) {
-        console.log(e.message);
-    }
-}
-start()
+mongoose.connect(MongoLink, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}, () => {
+    console.log('Database connected...')
+});
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(upload());
+app.use(express.static(path.resolve(__dirname, "public")));
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(require('./routes/index'));
 
-app.use(require('./routes/index'))
-
-app.listen(3000, () => {
-    console.log('success connect server');
+app.listen(PORT, () => {
+    console.log('Server initialised...')
 })
